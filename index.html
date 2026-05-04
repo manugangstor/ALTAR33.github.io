@@ -3,74 +3,110 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Portfolio</title>
+  <title>Abhi Manu | 3D Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; overflow: hidden; }
-    #overlay {
+    body { margin: 0; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+    canvas { display: block; }
+    #ui {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      justify-content: space-between;
       color: white;
-      font-family: sans-serif;
       pointer-events: none;
     }
+    .section { pointer-events: auto; }
   </style>
 </head>
 <body class="bg-black">
-  <div id="overlay">
-    <h1 class="text-4xl">Abhi Manu Portfolio</h1>
+
+<div id="ui">
+  <!-- Navbar -->
+  <div class="section flex justify-between items-center p-6 text-sm tracking-widest">
+    <div class="text-xl">ABHI MANU</div>
+    <div class="space-x-6">
+      <a href="#" class="hover:text-cyan-400">Projects</a>
+      <a href="#" class="hover:text-cyan-400">Skills</a>
+      <a href="#" class="hover:text-cyan-400">Contact</a>
+    </div>
   </div>
 
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  <!-- Hero -->
+  <div class="section flex flex-col items-center justify-center text-center mb-20">
+    <h1 class="text-5xl mb-4">3D Developer Portfolio</h1>
+    <p class="text-gray-400">Building premium plugins & interactive experiences</p>
+  </div>
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+  <!-- Footer -->
+  <div class="section text-center p-4 text-gray-500 text-sm">
+    © 2026 Abhi Manu
+  </div>
+</div>
 
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ffcc });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+<script>
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 
-    const light = new THREE.PointLight(0xffffff, 1, 100);
-    light.position.set(10, 10, 10);
-    scene.add(light);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-    camera.position.z = 5;
+// Geometry
+const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+const material = new THREE.MeshStandardMaterial({
+  color: 0x00ffff,
+  metalness: 0.8,
+  roughness: 0.2
+});
 
-    function animate() {
-      requestAnimationFrame(animate);
+const knot = new THREE.Mesh(geometry, material);
+scene.add(knot);
 
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+// Lights
+const light1 = new THREE.PointLight(0xffffff, 1);
+light1.position.set(5,5,5);
+scene.add(light1);
 
-      renderer.render(scene, camera);
-    }
+const light2 = new THREE.PointLight(0x00ffff, 1);
+light2.position.set(-5,-5,-5);
+scene.add(light2);
 
-    animate();
+camera.position.z = 4;
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+// Animation
+function animate() {
+  requestAnimationFrame(animate);
 
-    // Mouse interaction
-    window.addEventListener('mousemove', (event) => {
-      const x = (event.clientX / window.innerWidth) * 2 - 1;
-      const y = -(event.clientY / window.innerHeight) * 2 + 1;
-      cube.rotation.x = y * 2;
-      cube.rotation.y = x * 2;
-    });
-  </script>
+  knot.rotation.x += 0.005;
+  knot.rotation.y += 0.01;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// Mouse interaction
+window.addEventListener('mousemove', (e) => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 2;
+  const y = (e.clientY / window.innerHeight - 0.5) * 2;
+
+  knot.rotation.y = x;
+  knot.rotation.x = y;
+});
+
+// Resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
 </body>
 </html>
