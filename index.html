@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ALTAR · Manuel Gangstor</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   RESET & ROOT
+══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#00d4ff;
+  --purple:#6d28d9;
+  --purple-light:#a855f7;
+  --navy:#060b1a;
+  --dark:#02040c;
+  --glass:rgba(10,18,40,0.6);
+  --border:rgba(0,212,255,0.15);
+  --border-purple:rgba(109,40,217,0.3);
+  --text:rgba(255,255,255,0.85);
+  --muted:rgba(255,255,255,0.35);
+  --glow-blue:0 0 30px rgba(0,212,255,0.4);
+  --glow-purple:0 0 30px rgba(109,40,217,0.5);
+  --font-head:'Orbitron',monospace;
+  --font-body:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--dark);
+  color:var(--text);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  cursor:none;
+}
+::selection{background:rgba(0,212,255,0.3);color:#fff}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
+
+/* ══════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════ */
+#cursor-dot{
+  position:fixed;width:8px;height:8px;border-radius:50%;
+  background:var(--blue);pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 12px var(--blue),0 0 24px rgba(0,212,255,0.5);
+  transition:width .15s,height .15s;
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;border-radius:50%;
+  border:1px solid rgba(0,212,255,0.5);pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+}
+.cursor-trail{
+  position:fixed;width:4px;height:4px;border-radius:50%;
+  background:rgba(0,212,255,0.4);pointer-events:none;z-index:9997;
+  transform:translate(-50%,-50%);
+}
+
+/* ══════════════════════════════════════════
+   BACKGROUND LAYERS
+══════════════════════════════════════════ */
+#bg-gradient{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse at 60% 40%, #0a0f1f 0%, #05070d 60%, #000 100%);
+}
+/* Nebula gas clouds */
+.nebula{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:1;
+  filter:blur(var(--blur,120px));opacity:var(--op,0.12);
+  animation:nebDrift var(--dur,20s) ease-in-out infinite alternate;
+}
+@keyframes nebDrift{
+  0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(var(--tx,30px),var(--ty,20px)) scale(1.1)}
+}
+/* Noise overlay */
+#noise{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.025;
+}
+/* 3-layer star canvas */
+#stars-canvas{position:fixed;inset:0;z-index:3;pointer-events:none}
+
+/* Glowing arc waves */
+.arc-wave{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:4;
+  border:1px solid;animation:arcPulse var(--d,8s) ease-in-out infinite;
+  opacity:0;
+}
+@keyframes arcPulse{
+  0%{transform:translate(-50%,-50%) scale(0.6);opacity:0}
+  50%{opacity:var(--mop,0.06)}
+  100%{transform:translate(-50%,-50%) scale(1.4);opacity:0}
+}
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;width:100%;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 50px;
+  background:rgba(2,4,12,0.7);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(0,212,255,0.08);
+}
+.nav-logo{
+  font-family:var(--font-head);font-size:16px;font-weight:900;
+  letter-spacing:.2em;color:var(--blue);
+  text-shadow:0 0 20px rgba(0,212,255,0.6);
+}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-link{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;transition:color .3s;
+  position:relative;
+}
+.nav-link::after{
+  content:'';position:absolute;bottom:-4px;left:0;
+  width:0;height:1px;background:var(--blue);transition:width .3s;
+}
+.nav-link:hover{color:var(--blue)}
+.nav-link:hover::after{width:100%}
+.nav-status{
+  display:flex;align-items:center;gap:8px;
+  font-size:9px;letter-spacing:.15em;color:var(--muted);
+}
+.status-pulse{
+  width:6px;height:6px;border-radius:50%;background:#00ff88;
+  box-shadow:0 0 8px #00ff88;
+  animation:statusBlink 2s ease-in-out infinite;
+}
+@keyframes statusBlink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ══════════════════════════════════════════
+   SECTIONS SHARED
+══════════════════════════════════════════ */
+section{
+  position:relative;z-index:10;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  padding:120px 60px;
+}
+.section-label{
+  font-size:9px;letter-spacing:.35em;text-transform:uppercase;
+  color:var(--blue);margin-bottom:16px;opacity:0.7;
+}
+.section-title{
+  font-family:var(--font-head);
+  font-size:clamp(28px,4vw,52px);
+  font-weight:900;letter-spacing:.06em;
+  text-align:center;line-height:1.1;margin-bottom:16px;
+}
+.title-gradient{
+  background:linear-gradient(135deg,var(--blue),var(--purple-light));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.title-glow{
+  filter:drop-shadow(0 0 20px rgba(0,212,255,0.5));
+}
+.section-sub{
+  font-size:12px;color:var(--muted);letter-spacing:.08em;
+  text-align:center;margin-bottom:60px;line-height:1.8;
+}
+
+/* Reveal */
+.reveal{
+  opacity:0;transform:translateY(30px);
+  transition:opacity .8s cubic-bezier(0.2,0,0,1),transform .8s cubic-bezier(0.2,0,0,1);
+  transition-delay:var(--d,0s);
+}
+.reveal.in{opacity:1;transform:none}
+
+/* ══════════════════════════════════════════
+   HERO — CORE REACTOR
+══════════════════════════════════════════ */
+#hero{padding-top:80px;position:relative;overflow:hidden}
+
+/* Three.js canvas for orb */
+#orb-canvas{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+}
+.hero-content{
+  position:relative;z-index:2;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
+.hero-sys-tag{
+  display:inline-block;font-size:9px;letter-spacing:.4em;
+  text-transform:uppercase;color:rgba(0,212,255,0.5);
+  padding:6px 20px;border:1px solid rgba(0,212,255,0.2);
+  border-radius:100px;margin-bottom:32px;
+  background:rgba(0,212,255,0.04);
+}
+.hero-name{
+  font-family:var(--font-head);
+  font-size:clamp(52px,10vw,130px);
+  font-weight:900;letter-spacing:-.02em;line-height:.9;
+  background:linear-gradient(135deg,#fff 0%,var(--blue) 50%,var(--purple-light) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(0,212,255,0.3));
+  margin-bottom:8px;
+}
+.hero-scan-line{
+  position:relative;font-size:13px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:48px;
+  overflow:hidden;
+}
+.hero-scan-line::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.4),transparent);
+  animation:scanText 3s ease-in-out infinite;
+}
+@keyframes scanText{0%{left:-100%}100%{left:200%}}
+.hero-decode{
+  font-size:11px;letter-spacing:.25em;color:var(--blue);
+  text-transform:uppercase;margin-bottom:48px;
+  animation:decode 4s steps(1) infinite;
+}
+@keyframes decode{
+  0%{opacity:1}10%{opacity:0}20%{opacity:1}30%{opacity:0}
+  40%{opacity:1}100%{opacity:1}
+}
+.hero-ctas{display:flex;gap:16px;align-items:center}
+.btn-transmit{
+  font-family:var(--font-head);font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;padding:14px 32px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:#000;text-decoration:none;border-radius:2px;
+  position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .3s;
+}
+.btn-transmit:hover{transform:translateY(-2px);box-shadow:var(--glow-blue)}
+.btn-transmit::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,0.2) 50%,transparent 100%);
+  transform:translateX(-100%);transition:transform .4s;
+}
+.btn-transmit:hover::before{transform:translateX(100%)}
+.btn-ghost-space{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;
+  padding:14px 24px;border:1px solid rgba(255,255,255,0.1);
+  border-radius:2px;transition:border-color .3s,color .3s;
+}
+.btn-ghost-space:hover{border-color:var(--blue);color:var(--blue)}
+
+/* Rotating outer rings (CSS) */
+.hero-ring{
+  position:absolute;border-radius:50%;border:1px solid;
+  pointer-events:none;z-index:1;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+}
+
+/* ══════════════════════════════════════════
+   STAR SYSTEMS — PROJECTS
+══════════════════════════════════════════ */
+#projects{min-height:100vh;position:relative}
+#constellation-canvas{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+}
+.star-systems-container{
+  position:relative;z-index:2;
+  width:min(700px,90vw);height:min(700px,90vw);
+}
+.star-node{
+  position:absolute;transform:translate(-50%,-50%);
+  cursor:pointer;
+}
+.star-core{
+  width:var(--s,18px);height:var(--s,18px);border-radius:50%;
+  background:radial-gradient(circle,#fff 0%,var(--c,var(--blue)) 40%,transparent 70%);
+  box-shadow:0 0 var(--gr,20px) var(--c,var(--blue)),0 0 calc(var(--gr,20px)*2) rgba(0,212,255,0.3);
+  animation:starPulse var(--sp,3s) ease-in-out infinite;
+  transition:transform .3s;
+  position:relative;z-index:2;
+}
+@keyframes starPulse{
+  0%,100%{box-shadow:0 0 var(--gr,20px) var(--c,var(--blue)),0 0 calc(var(--gr,20px)*2) rgba(0,212,255,0.2)}
+  50%{box-shadow:0 0 calc(var(--gr,20px)*1.8) var(--c,var(--blue)),0 0 calc(var(--gr,20px)*3.5) rgba(0,212,255,0.4)}
+}
+.star-node:hover .star-core{transform:scale(2.5)}
+/* Expanded card on hover */
+.star-popup{
+  position:absolute;left:50%;transform:translateX(-50%) translateY(10px);
+  bottom:calc(100% + 20px);
+  width:260px;
+  background:rgba(6,11,26,0.92);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  backdrop-filter:blur(20px);
+  opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;
+  z-index:20;
+}
+.star-node:hover .star-popup{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all}
+.star-popup::before{
+  content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  width:8px;height:8px;background:rgba(6,11,26,0.92);
+  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  transform:translateX(-50%) rotate(45deg);
+}
+.popup-num{font-size:9px;letter-spacing:.2em;color:var(--c,var(--blue));margin-bottom:8px;opacity:.6}
+.popup-title{font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:8px;color:#fff}
+.popup-desc{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:12px}
+.popup-tech{display:flex;flex-wrap:wrap;gap:6px}
+.popup-tech span{
+  font-size:8px;letter-spacing:.15em;text-transform:uppercase;
+  padding:3px 8px;border:1px solid rgba(255,255,255,0.1);
+  border-radius:100px;color:var(--muted);
+}
+.star-label{
+  position:absolute;top:calc(100% + 16px);left:50%;transform:translateX(-50%);
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap;text-align:center;
+  transition:color .3s;
+}
+.star-node:hover .star-label{color:var(--c,var(--blue))}
+
+/* Center planet */
+.center-planet{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:80px;height:80px;
+  border-radius:50%;z-index:5;
+  background:radial-gradient(circle at 35% 35%,#1a2a5e,#060b1a 70%);
+  box-shadow:
+    0 0 40px rgba(0,212,255,0.3),
+    0 0 80px rgba(109,40,217,0.2),
+    inset 0 0 30px rgba(0,212,255,0.1);
+}
+.planet-ring{
+  position:absolute;top:50%;left:50%;
+  border:1px solid rgba(0,212,255,0.25);
+  border-radius:50%;transform:translate(-50%,-50%) rotateX(75deg);
+  animation:planetRingSpin 8s linear infinite;
+}
+@keyframes planetRingSpin{to{transform:translate(-50%,-50%) rotateX(75deg) rotateZ(360deg)}}
+.planet-label{
+  position:absolute;top:calc(50% + 52px);left:50%;transform:translateX(-50%);
+  font-family:var(--font-head);font-size:8px;letter-spacing:.25em;
+  color:var(--blue);white-space:nowrap;text-transform:uppercase;
+}
+
+/* ══════════════════════════════════════════
+   ORBIT TIMELINE — EXPERIENCE
+══════════════════════════════════════════ */
+#experience{background:none}
+.orbit-system{
+  position:relative;width:min(580px,90vw);height:min(580px,90vw);
+}
+.orbit-track{
+  position:absolute;top:50%;left:50%;
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:50%;transform:translate(-50%,-50%);
+  animation:orbitSpin var(--spd,30s) linear infinite;
+}
+.orbit-node{
+  position:absolute;
+  cursor:pointer;
+}
+.orbit-gem{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--glass);
+  border:1px solid var(--c,var(--border));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  box-shadow:0 0 20px color-mix(in srgb,var(--c,var(--blue)) 30%,transparent);
+  transition:transform .3s,box-shadow .3s;
+  position:relative;
+}
+.orbit-gem:hover{
+  transform:scale(1.3);
+  box-shadow:0 0 40px color-mix(in srgb,var(--c,var(--blue)) 60%,transparent);
+}
+.orbit-tooltip{
+  position:absolute;left:60px;top:50%;transform:translateY(-50%);
+  width:200px;background:rgba(6,11,26,0.95);
+  border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s;z-index:10;
+  backdrop-filter:blur(20px);
+}
+.orbit-node:hover .orbit-tooltip{opacity:1}
+.orbit-tooltip h4{font-family:var(--font-head);font-size:11px;color:var(--blue);margin-bottom:4px}
+.orbit-tooltip p{font-size:10px;color:var(--muted);line-height:1.6}
+.orbit-tooltip .year{font-size:9px;color:var(--purple-light);margin-top:6px;letter-spacing:.1em}
+/* Center core */
+.orbit-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:90px;height:90px;border-radius:50%;
+  background:radial-gradient(circle at 40% 30%,#1a0f40,#060b1a);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:10px;letter-spacing:.15em;
+  color:var(--purple-light);z-index:6;
+  box-shadow:0 0 50px rgba(109,40,217,0.4),inset 0 0 20px rgba(109,40,217,0.1);
+}
+.orbit-center-ring{
+  position:absolute;top:50%;left:50%;
+  width:110px;height:110px;border-radius:50%;
+  border:1px solid rgba(109,40,217,0.3);
+  transform:translate(-50%,-50%);
+  animation:coreRingPulse 2s ease-in-out infinite;
+}
+@keyframes coreRingPulse{
+  0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.5}
+  50%{transform:translate(-50%,-50%) scale(1.15);opacity:0.2}
+}
+
+/* ══════════════════════════════════════════
+   ENERGY GRID — SKILLS
+══════════════════════════════════════════ */
+#skills-section{background:none}
+.energy-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px;width:100%;max-width:900px;
+}
+.energy-node{
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;padding:24px;
+  position:relative;overflow:hidden;
+  cursor:pointer;transition:border-color .3s,transform .3s;
+}
+.energy-node:hover{
+  border-color:var(--c,var(--border));
+  transform:translateY(-4px);
+}
+.energy-node::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c,var(--blue)),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.energy-node:hover::before{opacity:1}
+.energy-icon{font-size:26px;margin-bottom:14px;display:block}
+.energy-name{
+  font-family:var(--font-head);font-size:11px;letter-spacing:.1em;
+  margin-bottom:12px;color:#fff;
+}
+.energy-bar{
+  height:3px;background:rgba(255,255,255,0.06);border-radius:3px;
+  overflow:hidden;margin-bottom:8px;
+}
+.energy-fill{
+  height:100%;border-radius:3px;width:0;
+  background:linear-gradient(90deg,var(--c,var(--blue)),color-mix(in srgb,var(--c,var(--blue)) 60%,#fff));
+  transition:width 1.4s cubic-bezier(0.4,0,0.2,1);
+  position:relative;
+}
+.energy-fill::after{
+  content:'';position:absolute;right:0;top:-1px;bottom:-1px;width:4px;
+  background:#fff;border-radius:2px;
+  box-shadow:0 0 8px var(--c,var(--blue));
+  opacity:0;transition:opacity .3s;
+}
+.energy-node.charged .energy-fill::after{opacity:1;animation:fillGlow 1.5s ease-in-out infinite}
+@keyframes fillGlow{0%,100%{opacity:1}50%{opacity:0.3}}
+.energy-node.charged .energy-fill{width:var(--p)!important}
+.energy-percent{font-size:10px;color:var(--c,var(--blue));letter-spacing:.1em}
+/* Crystal pulse around icon */
+.energy-crystal{
+  position:absolute;top:16px;right:16px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--c,var(--blue));
+  box-shadow:0 0 10px var(--c,var(--blue));
+  animation:crystalPulse var(--pd,2s) ease-in-out infinite;
+}
+@keyframes crystalPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.5);opacity:.5}}
+
+/* ══════════════════════════════════════════
+   MODULES — SERVICES
+══════════════════════════════════════════ */
+#services{background:none}
+.modules-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;width:100%;max-width:1000px;
+}
+.module-card{
+  background:rgba(6,11,26,0.8);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;padding:32px;
+  position:relative;overflow:hidden;
+  cursor:pointer;transition:all .4s cubic-bezier(0.2,0,0,1);
+}
+.module-card:hover{
+  border-color:rgba(0,212,255,0.3);
+  transform:translateY(-6px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),var(--glow-blue);
+}
+.module-badge{
+  display:inline-block;font-size:8px;letter-spacing:.25em;text-transform:uppercase;
+  padding:4px 12px;border-radius:100px;margin-bottom:20px;
+  border:1px solid var(--bc,rgba(0,212,255,0.3));
+  color:var(--tc,var(--blue));
+  background:color-mix(in srgb,var(--tc,var(--blue)) 8%,transparent);
+}
+.module-icon{font-size:36px;margin-bottom:16px;display:block}
+.module-title{
+  font-family:var(--font-head);font-size:14px;font-weight:700;
+  letter-spacing:.06em;margin-bottom:12px;
+}
+.module-desc{font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:20px}
+.module-arrow{
+  font-size:11px;letter-spacing:.15em;color:var(--blue);
+  text-transform:uppercase;transition:letter-spacing .3s;
+}
+.module-card:hover .module-arrow{letter-spacing:.25em}
+/* Holographic lines overlay */
+.module-holo{
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.015) 2px,rgba(0,212,255,0.015) 4px);
+  opacity:0;transition:opacity .3s;
+}
+.module-card:hover .module-holo{opacity:1}
+.module-corner{
+  position:absolute;width:20px;height:20px;
+  border-color:rgba(0,212,255,0.4);border-style:solid;
+  opacity:0;transition:opacity .4s;
+}
+.module-card:hover .module-corner{opacity:1}
+.mc-tl{top:10px;left:10px;border-width:2px 0 0 2px}
+.mc-br{bottom:10px;right:10px;border-width:0 2px 2px 0}
+
+/* ══════════════════════════════════════════
+   CONTACT — SIGNAL TRANSMISSION
+══════════════════════════════════════════ */
+#contact-section{background:none}
+.signal-panel{
+  width:min(560px,90vw);
+  background:rgba(6,11,26,0.85);
+  border:1px solid rgba(0,212,255,0.12);
+  border-radius:20px;padding:48px;
+  backdrop-filter:blur(30px);
+  position:relative;overflow:hidden;
+}
+.signal-panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--blue) 50%,transparent);
+}
+.signal-header{text-align:center;margin-bottom:40px}
+.signal-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,255,0.15),rgba(109,40,217,0.1));
+  border:1px solid rgba(0,212,255,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin:0 auto 20px;
+  animation:signalPing 2s ease-in-out infinite;
+}
+@keyframes signalPing{
+  0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,0.4)}
+  50%{box-shadow:0 0 0 20px rgba(0,212,255,0)}
+}
+/* Holo input fields */
+.holo-field{
+  margin-bottom:20px;position:relative;
+}
+.holo-label{
+  font-size:9px;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:8px;
+}
+.holo-input{
+  width:100%;background:transparent;
+  border:none;border-bottom:1px solid rgba(0,212,255,0.2);
+  color:#fff;font-family:var(--font-body);font-size:13px;
+  padding:12px 0;outline:none;
+  transition:border-color .3s;
+}
+.holo-input::placeholder{color:rgba(255,255,255,0.15)}
+.holo-input:focus{border-bottom-color:var(--blue)}
+.holo-input:focus + .holo-line{width:100%}
+.holo-line{
+  position:absolute;bottom:0;left:0;height:1px;width:0;
+  background:linear-gradient(90deg,var(--blue),var(--purple-light));
+  transition:width .4s cubic-bezier(0.4,0,0.2,1);
+}
+textarea.holo-input{resize:none;height:80px;border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:12px 16px}
+textarea.holo-input:focus{border-color:var(--blue)}
+.btn-signal{
+  width:100%;padding:16px;
+  font-family:var(--font-head);font-size:11px;letter-spacing:.25em;text-transform:uppercase;
+  background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(109,40,217,0.15));
+  border:1px solid rgba(0,212,255,0.3);
+  color:var(--blue);border-radius:8px;cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:all .3s;margin-top:8px;
+}
+.btn-signal:hover{
+  background:linear-gradient(135deg,rgba(0,212,255,0.25),rgba(109,40,217,0.25));
+  box-shadow:var(--glow-blue);
+}
+/* Beam effect on click */
+.btn-signal.transmitting::after{
+  content:'';position:absolute;top:0;left:-100%;right:100%;bottom:0;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.5),transparent);
+  animation:beam .8s ease-out forwards;
+}
+@keyframes beam{to{left:100%;right:-100%}}
+.signal-beam{
+  position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);
+  width:2px;height:0;
+  background:linear-gradient(to bottom,var(--blue),transparent);
+  transition:height .5s ease-out;pointer-events:none;
+}
+.btn-signal.transmitting .signal-beam{height:300px}
+
+/* ══════════════════════════════════════════
+   DETAIL PANEL (slide-in)
+══════════════════════════════════════════ */
+#detail-panel{
+  position:fixed;right:-420px;top:0;bottom:0;width:380px;
+  background:rgba(2,4,12,0.97);
+  border-left:1px solid var(--border);
+  z-index:200;
+  transition:right .4s cubic-bezier(0.2,0,0,1);
+  padding:60px 36px 36px;
+  overflow-y:auto;
+  backdrop-filter:blur(30px);
+}
+#detail-panel.open{right:0}
+#dp-close{
+  position:absolute;top:20px;right:20px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);width:36px;height:36px;border-radius:50%;
+  font-size:16px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+#dp-close:hover{border-color:var(--blue);color:var(--blue)}
+.dp-tag{font-size:9px;letter-spacing:.25em;color:var(--blue);text-transform:uppercase;margin-bottom:16px}
+.dp-title{font-family:var(--font-head);font-size:22px;font-weight:900;
+  background:linear-gradient(135deg,var(--blue),var(--purple-light));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:6px;}
+.dp-sub{font-size:11px;color:var(--muted);margin-bottom:28px;letter-spacing:.08em}
+.dp-body{font-size:12px;color:var(--muted);line-height:1.9}
+.dp-stat{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.dp-stat-label{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,0.25)}
+.dp-stat-val{font-family:var(--font-head);font-size:14px;color:var(--blue)}
+.dp-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.dp-chip{font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  padding:5px 12px;border:1px solid rgba(255,255,255,0.08);border-radius:100px;color:var(--muted)}
+
+/* ══════════════════════════════════════════
+   HUD + MINIMAP
+══════════════════════════════════════════ */
+.corner-hud{position:fixed;width:50px;height:50px;border-color:rgba(0,212,255,0.2);border-style:solid;z-index:50;pointer-events:none}
+.c-tl{top:18px;left:18px;border-width:1px 0 0 1px}
+.c-tr{top:18px;right:18px;border-width:1px 1px 0 0}
+.c-bl{bottom:18px;left:18px;border-width:0 0 1px 1px}
+.c-br{bottom:18px;right:18px;border-width:0 1px 1px 0}
+.scan-hud{
+  position:fixed;top:0;left:0;right:0;height:1px;z-index:50;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.3),transparent);
+  animation:scanHud 6s linear infinite;opacity:0.4;
+}
+@keyframes scanHud{0%{top:0}100%{top:100vh}}
+
+/* Time display */
+#hud-clock{
+  position:fixed;top:26px;right:70px;
+  font-size:9px;letter-spacing:.2em;color:rgba(0,212,255,0.4);
+  z-index:100;font-family:var(--font-head);
+}
+#hud-coords{
+  position:fixed;bottom:26px;left:70px;
+  font-size:9px;letter-spacing:.15em;color:rgba(0,212,255,0.3);
+  z-index:100;
+}
+#hud-fps{
+  position:fixed;bottom:26px;right:70px;
+  font-size:9px;letter-spacing:.15em;color:rgba(109,40,217,0.5);
+  z-index:100;
+}
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND LAYERS -->
+<div id="bg-gradient"></div>
+
+<!-- Nebula gas clouds -->
+<div class="nebula" style="width:800px;height:800px;background:radial-gradient(circle,#1e3a8a,transparent);top:-200px;left:-200px;--blur:140px;--op:0.18;--dur:18s;--tx:60px;--ty:40px"></div>
+<div class="nebula" style="width:600px;height:600px;background:radial-gradient(circle,#6d28d9,transparent);top:20%;right:-150px;--blur:120px;--op:0.14;--dur:24s;--tx:-40px;--ty:60px"></div>
+<div class="nebula" style="width:700px;height:700px;background:radial-gradient(circle,#1e40af,transparent);bottom:-150px;left:20%;--blur:150px;--op:0.12;--dur:20s;--tx:30px;--ty:-50px"></div>
+<div class="nebula" style="width:400px;height:400px;background:radial-gradient(circle,#7c3aed,transparent);top:60%;left:60%;--blur:100px;--op:0.10;--dur:15s;--tx:-20px;--ty:30px"></div>
+<div class="nebula" style="width:300px;height:300px;background:radial-gradient(circle,#0ea5e9,transparent);top:40%;left:40%;--blur:90px;--op:0.08;--dur:12s;--tx:50px;--ty:-30px"></div>
+
+<!-- Noise -->
+<div id="noise"></div>
+
+<!-- 3-Layer Stars -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- Scan wave -->
+<div class="scan-hud"></div>
+
+<!-- Arc waves (galaxy ripples) -->
+<div class="arc-wave" style="width:300px;height:300px;top:30%;left:40%;border-color:rgba(0,212,255,0.15);--d:7s;--mop:0.08;animation-delay:0s"></div>
+<div class="arc-wave" style="width:500px;height:500px;top:30%;left:40%;border-color:rgba(109,40,217,0.1);--d:10s;--mop:0.06;animation-delay:2.5s"></div>
+<div class="arc-wave" style="width:200px;height:200px;top:60%;left:20%;border-color:rgba(0,212,255,0.1);--d:8s;--mop:0.07;animation-delay:1s"></div>
+
+<!-- Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- HUD corners -->
+<div class="corner-hud c-tl"></div>
+<div class="corner-hud c-tr"></div>
+<div class="corner-hud c-bl"></div>
+<div class="corner-hud c-br"></div>
+<div id="hud-clock">00:00:00</div>
+<div id="hud-coords">X:0.00 · Y:0.00</div>
+<div id="hud-fps">60 FPS</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">ALTAR<span style="color:rgba(0,212,255,0.4)">.</span></div>
+  <ul class="nav-links">
+    <li><a href="#hero" class="nav-link">Core</a></li>
+    <li><a href="#projects" class="nav-link">Systems</a></li>
+    <li><a href="#experience" class="nav-link">Orbit</a></li>
+    <li><a href="#skills-section" class="nav-link">Energy</a></li>
+    <li><a href="#services" class="nav-link">Modules</a></li>
+    <li><a href="#contact-section" class="nav-link">Signal</a></li>
+  </ul>
+  <div class="nav-status">
+    <div class="status-pulse"></div>
+    <span>SYSTEMS ONLINE</span>
+  </div>
+</nav>
+
+<!-- Three.js orb canvas (hero only) -->
+<canvas id="orb-canvas" style="position:fixed;inset:0;z-index:5;pointer-events:none"></canvas>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-sys-tag reveal" style="--d:0s">◈ ALTAR SPACE INTERFACE · SECTOR 7-G</div>
+    <h1 class="hero-name reveal" style="--d:0.1s">MANUEL<br/>GANGSTOR</h1>
+    <div class="hero-scan-line reveal" style="--d:0.2s">Creative Developer · Digital Universe Architect</div>
+    <div class="hero-decode reveal" style="--d:0.3s">[ DECODING REALITY... UPLOADING COSMOS ]</div>
+    <div class="hero-ctas reveal" style="--d:0.4s">
+      <a href="#projects" class="btn-transmit">Explore Systems →</a>
+      <a href="#contact-section" class="btn-ghost-space">Open Channel</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROJECTS — STAR SYSTEMS ══ -->
+<section id="projects">
+  <div class="section-label reveal">// Star Systems</div>
+  <h2 class="section-title title-gradient title-glow reveal" style="--d:0.1s">Project Universe</h2>
+  <p class="section-sub reveal" style="--d:0.2s">Each node is a world. Hover to scan. Click to enter.</p>
+
+  <div class="star-systems-container reveal" style="--d:0.3s">
+    <canvas id="constellation-canvas"></canvas>
+
+    <!-- Center -->
+    <div class="center-planet">
+      <div class="planet-ring" style="width:120px;height:120px"></div>
+      <div class="planet-ring" style="width:160px;height:160px;animation-duration:12s;border-color:rgba(109,40,217,0.15)"></div>
+    </div>
+    <div class="planet-label">ALTAR CORE</div>
+
+    <!-- Star nodes (positioned by JS) -->
+    <div class="star-node" id="sn0" style="--c:#00d4ff;--s:22px;--gr:28px;--sp:2.5s">
+      <div class="star-core"></div>
+      <div class="star-label">Cosmos UI</div>
+      <div class="star-popup">
+        <div class="popup-num" style="--c:#00d4ff">01 · SYSTEM</div>
+        <div class="popup-title">Cosmos UI</div>
+        <div class="popup-desc">Immersive space dashboard with real-time 3D data visualizations, particle systems, and WebGL shaders.</div>
+        <div class="popup-tech"><span>Three.js</span><span>WebGL</span><span>React</span><span>GSAP</span></div>
+      </div>
+    </div>
+
+    <div class="star-node" id="sn1" style="--c:#a855f7;--s:18px;--gr:22px;--sp:3.2s">
+      <div class="star-core"></div>
+      <div class="star-label">NeuralFlow</div>
+      <div class="star-popup">
+        <div class="popup-num" style="--c:#a855f7">02 · SYSTEM</div>
+        <div class="popup-title">NeuralFlow</div>
+        <div class="popup-desc">Visual AI workflow builder with draggable nodes, real-time connections, and animated data flows.</div>
+        <div class="popup-tech"><span>Canvas API</span><span>Node.js</span><span>GSAP</span></div>
+      </div>
+    </div>
+
+    <div class="star-node" id="sn2" style="--c:#ff2d78;--s:20px;--gr:26px;--sp:2.8s">
+      <div class="star-core"></div>
+      <div class="star-label">Lumen</div>
+      <div class="star-popup">
+        <div class="popup-num" style="--c:#ff2d78">03 · SYSTEM</div>
+        <div class="popup-title">Lumen Agency</div>
+        <div class="popup-desc">Creative agency site with custom GLSL shaders, morphing text, and GPU-accelerated visual effects.</div>
+        <div class="popup-tech"><span>GLSL</span><span>Shader</span><span>Vue</span><span>Vite</span></div>
+      </div>
+    </div>
+
+    <div class="star-node" id="sn3" style="--c:#ffd94a;--s:16px;--gr:20px;--sp:3.8s">
+      <div class="star-core"></div>
+      <div class="star-label">DataSphere</div>
+      <div class="star-popup">
+        <div class="popup-num" style="--c:#ffd94a">04 · SYSTEM</div>
+        <div class="popup-title">DataSphere</div>
+        <div class="popup-desc">Globe visualization platform mapping live API data onto an interactive 3D earth model with real-time arcs.</div>
+        <div class="popup-tech"><span>TypeScript</span><span>D3.js</span><span>Three.js</span></div>
+      </div>
+    </div>
+
+    <div class="star-node" id="sn4" style="--c:#00ff88;--s:14px;--gr:18px;--sp:4.2s">
+      <div class="star-core"></div>
+      <div class="star-label">PhysXLab</div>
+      <div class="star-popup">
+        <div class="popup-num" style="--c:#00ff88">05 · SYSTEM</div>
+        <div class="popup-title">PhysXLab</div>
+        <div class="popup-desc">Real-time physics simulation playground with soft-body dynamics, fluid sim, and particle collisions.</div>
+        <div class="popup-tech"><span>WebAssembly</span><span>GLSL</span><span>Rust</span></div>
+      </div>
+    </div>
+
+    <div class="star-node" id="sn5" style="--c:#0ea5e9;--s:12px;--gr:16px;--sp:5s">
+      <div class="star-core"></div>
+      <div class="star-label">SignalOS</div>
+      <div class="star-popup">
+        <div class="popup-num" style="--c:#0ea5e9">06 · SYSTEM</div>
+        <div class="popup-title">SignalOS</div>
+        <div class="popup-desc">Developer productivity OS with AI-assisted terminal, visual process manager, and git graph visualizer.</div>
+        <div class="popup-tech"><span>Electron</span><span>React</span><span>Python</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EXPERIENCE — ORBIT ══ -->
+<section id="experience">
+  <div class="section-label reveal">// Orbit Timeline</div>
+  <h2 class="section-title title-gradient title-glow reveal" style="--d:0.1s">Experience</h2>
+  <p class="section-sub reveal" style="--d:0.2s">Orbiting around the core. Each ring = a phase of mastery.</p>
+
+  <div class="orbit-system reveal" style="--d:0.3s">
+    <!-- Orbit tracks -->
+    <div class="orbit-track" style="width:200px;height:200px;--spd:25s"></div>
+    <div class="orbit-track" style="width:340px;height:340px;--spd:40s;animation-direction:reverse"></div>
+    <div class="orbit-track" style="width:480px;height:480px;--spd:55s"></div>
+
+    <!-- Center -->
+    <div class="orbit-center">ALTAR</div>
+    <div class="orbit-center-ring"></div>
+
+    <!-- Inner orbit nodes (r=100) -->
+    <div class="orbit-node" id="on0" style="--c:rgba(0,212,255,0.6)">
+      <div class="orbit-gem" style="--c:rgba(0,212,255,0.4)">💡</div>
+      <div class="orbit-tooltip">
+        <h4>First Code</h4>
+        <p>Started building web experiments. HTML/CSS/JS obsession begins.</p>
+        <div class="year">2018 · GENESIS</div>
+      </div>
+    </div>
+    <div class="orbit-node" id="on1" style="--c:rgba(109,40,217,0.6)">
+      <div class="orbit-gem" style="--c:rgba(109,40,217,0.4)">🎮</div>
+      <div class="orbit-tooltip">
+        <h4>Game Dev Phase</h4>
+        <p>Built browser games with Canvas API. Discovered the power of real-time rendering.</p>
+        <div class="year">2019 · LEVEL UP</div>
+      </div>
+    </div>
+
+    <!-- Mid orbit nodes (r=170) -->
+    <div class="orbit-node" id="on2" style="--c:rgba(255,45,120,0.6)">
+      <div class="orbit-gem" style="--c:rgba(255,45,120,0.4)">⚛️</div>
+      <div class="orbit-tooltip" style="left:auto;right:60px">
+        <h4>React Mastery</h4>
+        <p>Deep-dived into React ecosystem. First freelance clients. First production app.</p>
+        <div class="year">2020 · LAUNCH</div>
+      </div>
+    </div>
+    <div class="orbit-node" id="on3" style="--c:rgba(255,217,74,0.6)">
+      <div class="orbit-gem" style="--c:rgba(255,217,74,0.4)">🌐</div>
+      <div class="orbit-tooltip">
+        <h4>WebGL Discovery</h4>
+        <p>Three.js clicked. Started blending 3D into every project. Nothing was the same.</p>
+        <div class="year">2021 · IGNITION</div>
+      </div>
+    </div>
+
+    <!-- Outer orbit nodes (r=240) -->
+    <div class="orbit-node" id="on4" style="--c:rgba(0,255,136,0.6)">
+      <div class="orbit-gem" style="--c:rgba(0,255,136,0.4)">🛸</div>
+      <div class="orbit-tooltip" style="left:auto;right:60px">
+        <h4>Senior Dev</h4>
+        <p>Led frontend teams, architected design systems, shipped AWWWARDS-level work.</p>
+        <div class="year">2022–23 · ORBIT</div>
+      </div>
+    </div>
+    <div class="orbit-node" id="on5" style="--c:rgba(14,165,233,0.6)">
+      <div class="orbit-gem" style="--c:rgba(14,165,233,0.4)">✨</div>
+      <div class="orbit-tooltip">
+        <h4>ALTAR Era</h4>
+        <p>Building the future. Immersive 3D interfaces, AI-powered experiences, open source.</p>
+        <div class="year">2024+ · BEYOND</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SKILLS — ENERGY GRID ══ -->
+<section id="skills-section">
+  <div class="section-label reveal">// Energy Grid</div>
+  <h2 class="section-title title-gradient title-glow reveal" style="--d:0.1s">Skills</h2>
+  <p class="section-sub reveal" style="--d:0.2s">Hover a node to charge it. Brightness = mastery level.</p>
+
+  <div class="energy-grid reveal" style="--d:0.3s">
+    <div class="energy-node" style="--c:#00d4ff;--pd:1.8s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">🌐</span>
+      <div class="energy-name">Three.js / WebGL</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:92%"></div></div>
+      <div class="energy-percent">92%</div>
+    </div>
+    <div class="energy-node" style="--c:#a855f7;--pd:2.2s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">⚛️</span>
+      <div class="energy-name">React / Next.js</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:88%"></div></div>
+      <div class="energy-percent">88%</div>
+    </div>
+    <div class="energy-node" style="--c:#ff2d78;--pd:1.5s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">⚡</span>
+      <div class="energy-name">GSAP / Animation</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:85%"></div></div>
+      <div class="energy-percent">85%</div>
+    </div>
+    <div class="energy-node" style="--c:#ffd94a;--pd:2.8s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">📐</span>
+      <div class="energy-name">GLSL Shaders</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:75%"></div></div>
+      <div class="energy-percent">75%</div>
+    </div>
+    <div class="energy-node" style="--c:#00ff88;--pd:2s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">🔷</span>
+      <div class="energy-name">TypeScript</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:82%"></div></div>
+      <div class="energy-percent">82%</div>
+    </div>
+    <div class="energy-node" style="--c:#0ea5e9;--pd:3s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">🎨</span>
+      <div class="energy-name">Blender / 3D</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:70%"></div></div>
+      <div class="energy-percent">70%</div>
+    </div>
+    <div class="energy-node" style="--c:#f472b6;--pd:2.4s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">🟢</span>
+      <div class="energy-name">Node.js / APIs</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:80%"></div></div>
+      <div class="energy-percent">80%</div>
+    </div>
+    <div class="energy-node" style="--c:#34d399;--pd:1.9s">
+      <div class="energy-crystal"></div>
+      <span class="energy-icon">🖌️</span>
+      <div class="energy-name">Figma / Design</div>
+      <div class="energy-bar"><div class="energy-fill" style="--p:90%"></div></div>
+      <div class="energy-percent">90%</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SERVICES — MODULES ══ -->
+<section id="services">
+  <div class="section-label reveal">// System Modules</div>
+  <h2 class="section-title title-gradient title-glow reveal" style="--d:0.1s">Services</h2>
+  <p class="section-sub reveal" style="--d:0.2s">Select a module to deploy.</p>
+
+  <div class="modules-grid reveal" style="--d:0.3s">
+    <div class="module-card">
+      <div class="module-holo"></div>
+      <div class="module-corner mc-tl"></div><div class="module-corner mc-br"></div>
+      <div class="module-badge" style="--bc:rgba(0,212,255,0.3);--tc:#00d4ff">CORE MODULE</div>
+      <span class="module-icon">🌐</span>
+      <div class="module-title">3D Web Experiences</div>
+      <div class="module-desc">WebGL, Three.js, and GLSL-powered immersive interfaces that make visitors stop scrolling.</div>
+      <div class="module-arrow">Deploy Module →</div>
+    </div>
+    <div class="module-card">
+      <div class="module-holo"></div>
+      <div class="module-corner mc-tl"></div><div class="module-corner mc-br"></div>
+      <div class="module-badge" style="--bc:rgba(109,40,217,0.4);--tc:#a855f7">UI MODULE</div>
+      <span class="module-icon">⚡</span>
+      <div class="module-title">Motion & Animation</div>
+      <div class="module-desc">Physics-based animations, scroll-triggered sequences, and micro-interactions that feel alive.</div>
+      <div class="module-arrow">Deploy Module →</div>
+    </div>
+    <div class="module-card">
+      <div class="module-holo"></div>
+      <div class="module-corner mc-tl"></div><div class="module-corner mc-br"></div>
+      <div class="module-badge" style="--bc:rgba(255,45,120,0.3);--tc:#ff2d78">DEV MODULE</div>
+      <span class="module-icon">🚀</span>
+      <div class="module-title">Full-Stack Apps</div>
+      <div class="module-desc">React + Node.js production applications with real-time data, APIs, and scalable architecture.</div>
+      <div class="module-arrow">Deploy Module →</div>
+    </div>
+    <div class="module-card">
+      <div class="module-holo"></div>
+      <div class="module-corner mc-tl"></div><div class="module-corner mc-br"></div>
+      <div class="module-badge" style="--bc:rgba(255,217,74,0.3);--tc:#ffd94a">DESIGN MODULE</div>
+      <span class="module-icon">🎨</span>
+      <div class="module-title">Design Systems</div>
+      <div class="module-desc">Figma-to-code design systems with tokens, components, and living documentation.</div>
+      <div class="module-arrow">Deploy Module →</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONTACT — SIGNAL ══ -->
+<section id="contact-section">
+  <div class="section-label reveal">// Signal Transmission</div>
+  <h2 class="section-title title-gradient title-glow reveal" style="--d:0.1s">Open Channel</h2>
+  <p class="section-sub reveal" style="--d:0.2s">Transmit a signal. Response within 24 light-hours.</p>
+
+  <div class="signal-panel reveal" style="--d:0.3s">
+    <div class="signal-header">
+      <div class="signal-icon">📡</div>
+      <div class="section-label">ALTAR COMMUNICATIONS · ENCRYPTED</div>
+    </div>
+    <div class="holo-field">
+      <label class="holo-label">Designation (Name)</label>
+      <input type="text" class="holo-input" placeholder="Your callsign..."/>
+      <div class="holo-line"></div>
+    </div>
+    <div class="holo-field">
+      <label class="holo-label">Frequency (Email)</label>
+      <input type="email" class="holo-input" placeholder="Signal address..."/>
+      <div class="holo-line"></div>
+    </div>
+    <div class="holo-field">
+      <label class="holo-label">Transmission</label>
+      <textarea class="holo-input" placeholder="Encode your message..."></textarea>
+    </div>
+    <button class="btn-signal" id="transmit-btn">
+      ◈ TRANSMIT SIGNAL
+      <div class="signal-beam"></div>
+    </button>
+  </div>
+</section>
+
+<!-- DETAIL PANEL -->
+<div id="detail-panel">
+  <button id="dp-close">✕</button>
+  <div class="dp-tag" id="dp-tag">System</div>
+  <div class="dp-title" id="dp-title">Project</div>
+  <div class="dp-sub" id="dp-sub">Details</div>
+  <div class="dp-body" id="dp-body"></div>
+  <div class="dp-tags" id="dp-tags"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════
+   1. THREE.JS — HERO ORB (reactor core)
+═══════════════════════════════════════════════ */
+{
+  const c=document.getElementById('orb-canvas');
+  const W=innerWidth,H=innerHeight;
+  c.width=W;c.height=H;
+  const r=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2));
+  r.setSize(W,H);
+  r.setClearColor(0x000000,0);
+
+  const sc=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(50,W/H,0.1,100);
+  cam.position.set(0,0,5);
+
+  // Lights
+  sc.add(new THREE.AmbientLight(0xffffff,0.4));
+  const pl1=new THREE.PointLight(0x00d4ff,8,20);
+  pl1.position.set(3,3,3);sc.add(pl1);
+  const pl2=new THREE.PointLight(0x6d28d9,5,20);
+  pl2.position.set(-3,-2,2);sc.add(pl2);
+  const pl3=new THREE.PointLight(0xffffff,2,15);
+  pl3.position.set(0,5,-3);sc.add(pl3);
+
+  // Core sphere
+  const orbGeo=new THREE.SphereGeometry(1,64,64);
+  const orbMat=new THREE.MeshPhysicalMaterial({
+    color:0x0a1a3a,metalness:0.8,roughness:0.05,
+    clearcoat:1,clearcoatRoughness:0.02,
+    emissive:new THREE.Color(0x001122),emissiveIntensity:0.5
+  });
+  const orb=new THREE.Mesh(orbGeo,orbMat);
+  sc.add(orb);
+
+  // Wireframe overlay
+  const wireGeo=new THREE.IcosahedronGeometry(1.05,2);
+  const wireMat=new THREE.MeshBasicMaterial({color:0x00d4ff,wireframe:true,transparent:true,opacity:0.07});
+  const wire=new THREE.Mesh(wireGeo,wireMat);
+  sc.add(wire);
+
+  // Outer glow ring
+  const torusGeo=new THREE.TorusGeometry(1.6,0.02,8,120);
+  const torusMat=new THREE.MeshBasicMaterial({color:0x00d4ff,transparent:true,opacity:0.5});
+  const torus=new THREE.Mesh(torusGeo,torusMat);
+  torus.rotation.x=Math.PI/2;sc.add(torus);
+
+  const torusGeo2=new THREE.TorusGeometry(2.0,0.012,8,120);
+  const torusMat2=new THREE.MeshBasicMaterial({color:0x6d28d9,transparent:true,opacity:0.3});
+  const torus2=new THREE.Mesh(torusGeo2,torusMat2);
+  torus2.rotation.x=Math.PI/3;torus2.rotation.y=Math.PI/5;sc.add(torus2);
+
+  // Particle field around orb
+  const pGeo=new THREE.BufferGeometry();
+  const pN=800;const pPos=new Float32Array(pN*3);
+  for(let i=0;i<pN;i++){
+    const phi=Math.acos(2*Math.random()-1);
+    const th=Math.random()*Math.PI*2;
+    const rad=1.8+Math.random()*2.5;
+    pPos[i*3]=rad*Math.sin(phi)*Math.cos(th);
+    pPos[i*3+1]=rad*Math.sin(phi)*Math.sin(th);
+    pPos[i*3+2]=rad*Math.cos(phi);
+  }
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  const pMat=new THREE.PointsMaterial({color:0x00d4ff,size:0.025,transparent:true,opacity:0.6,blending:THREE.AdditiveBlending,depthWrite:false});
+  const pts=new THREE.Points(pGeo,pMat);
+  sc.add(pts);
+
+  let ox=0,oy=0,trx=0,try_=0;
+  document.addEventListener('mousemove',e=>{
+    ox=(e.clientX/innerWidth-0.5)*1.5;
+    oy=(e.clientY/innerHeight-0.5)*1.5;
+  });
+
+  // Only show on hero
+  const heroSection=document.getElementById('hero');
+  const orbClk=new THREE.Clock();
+  function animateOrb(){
+    requestAnimationFrame(animateOrb);
+    const t=orbClk.getElapsedTime();
+    trx+=(ox-trx)*0.04;
+    try_+=(oy-try_)*0.04;
+
+    orb.rotation.y=t*0.2+trx*0.5;
+    orb.rotation.x=t*0.1+try_*0.3;
+    wire.rotation.y=-t*0.15;
+    wire.rotation.z=t*0.08;
+    pts.rotation.y=t*0.05;
+
+    torus.rotation.z=t*0.4;
+    torus2.rotation.y=t*0.25;
+
+    const breathe=1+Math.sin(t*1.2)*0.04;
+    orb.scale.setScalar(breathe);
+
+    pl1.position.x=Math.cos(t*0.7)*4;pl1.position.z=Math.sin(t*0.7)*4;
+    pl2.position.x=Math.cos(t*0.4+Math.PI)*4;pl2.position.z=Math.sin(t*0.4+Math.PI)*4;
+
+    // Fade out when scrolling
+    const heroH=heroSection.offsetHeight;
+    const scrollY=window.scrollY;
+    const op=Math.max(0,1-scrollY/(heroH*0.7));
+    c.style.opacity=op;
+
+    r.render(sc,cam);
+  }
+  animateOrb();
+  window.addEventListener('resize',()=>{
+    cam.aspect=innerWidth/innerHeight;
+    cam.updateProjectionMatrix();
+    r.setSize(innerWidth,innerHeight);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   2. 3-LAYER STAR FIELD (Canvas 2D)
+═══════════════════════════════════════════════ */
+{
+  const canvas=document.getElementById('stars-canvas');
+  const ctx=canvas.getContext('2d');
+  let W=canvas.width=innerWidth;
+  let H=canvas.height=innerHeight;
+
+  // Layer A — tiny static + flicker
+  const layerA=Array.from({length:300},()=>({
+    x:Math.random()*W,y:Math.random()*H,
+    r:Math.random()*0.6+0.2,
+    alpha:Math.random()*0.5+0.1,
+    flicker:Math.random()*0.003+0.001,
+    phase:Math.random()*Math.PI*2,
+  }));
+
+  // Layer B — medium drifting upward
+  const layerB=Array.from({length:150},()=>({
+    x:Math.random()*W,y:Math.random()*H,
+    r:Math.random()*1.0+0.4,
+    alpha:Math.random()*0.6+0.2,
+    speed:Math.random()*0.25+0.05,
+    drift:Math.random()*0.1-0.05,
+  }));
+
+  // Layer C — large glowing twinkling
+  const layerC=Array.from({length:40},()=>({
+    x:Math.random()*W,y:Math.random()*H,
+    r:Math.random()*1.8+0.8,
+    alpha:Math.random()*0.8+0.2,
+    speed:Math.random()*0.5+0.1,
+    twinkle:Math.random()*0.01+0.005,
+    phase:Math.random()*Math.PI*2,
+    hue:Math.random()<0.3?'rgba(180,160,255,':(Math.random()<0.5?'rgba(160,220,255,':'rgba(255,255,255,'),
+  }));
+
+  let mouseX=0,mouseY=0;
+  document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY});
+
+  let t=0;
+  function drawStars(){
+    requestAnimationFrame(drawStars);
+    ctx.clearRect(0,0,W,H);
+    t++;
+
+    // Layer A — static flicker
+    layerA.forEach(s=>{
+      const a=s.alpha+Math.sin(t*s.flicker+s.phase)*0.15;
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${Math.max(0,a)})`;
+      ctx.fill();
+    });
+
+    // Layer B — drift upward, wrap
+    layerB.forEach(s=>{
+      s.y-=s.speed;
+      s.x+=s.drift;
+      if(s.y<0){s.y=H;s.x=Math.random()*W}
+      if(s.x<0||s.x>W)s.x=(s.x+W)%W;
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,220,255,${s.alpha})`;
+      ctx.fill();
+    });
+
+    // Layer C — glow + twinkle + mouse attraction
+    layerC.forEach(s=>{
+      s.y-=s.speed;
+      if(s.y<0){s.y=H;s.x=Math.random()*W}
+      // subtle cursor attraction
+      const dx=mouseX-s.x,dy=mouseY-s.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>1&&dist<180){const f=(180-dist)/180*0.3;s.x+=dx/dist*f;s.y+=dy/dist*f}
+      const a=s.alpha+Math.sin(t*s.twinkle+s.phase)*0.3;
+      const aa=Math.max(0,Math.min(1,a));
+      if(!isFinite(s.x)||!isFinite(s.y)||s.r<=0)return;
+      // glow
+      const grad=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*5);
+      grad.addColorStop(0,s.hue+aa+')');
+      grad.addColorStop(1,s.hue+'0)');
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r*5,0,Math.PI*2);
+      ctx.fillStyle=grad;ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${aa})`;ctx.fill();
+    });
+  }
+  drawStars();
+  window.addEventListener('resize',()=>{
+    W=canvas.width=innerWidth;H=canvas.height=innerHeight;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   3. CONSTELLATION CANVAS
+═══════════════════════════════════════════════ */
+{
+  const container=document.querySelector('.star-systems-container');
+  const cc=document.getElementById('constellation-canvas');
+  function resizeCC(){
+    const r=container.getBoundingClientRect();
+    cc.width=r.width;cc.height=r.height;
+  }
+  resizeCC();
+  const ctx=cc.getContext('2d');
+  const SIZE=cc.width;
+  const CX=SIZE/2,CY=SIZE/2;
+
+  // Node positions in a circle
+  const N=6;
+  const radii=[SIZE*0.28,SIZE*0.34,SIZE*0.3,SIZE*0.38,SIZE*0.32,SIZE*0.35];
+  const baseAngles=Array.from({length:N},(_,i)=>(i/N)*Math.PI*2-Math.PI/2);
+  const positions=baseAngles.map((a,i)=>({
+    x:CX+Math.cos(a)*radii[i],
+    y:CY+Math.sin(a)*radii[i]
+  }));
+
+  // Position DOM nodes
+  const snodes=document.querySelectorAll('.star-node');
+  snodes.forEach((n,i)=>{
+    n.style.left=positions[i].x+'px';
+    n.style.top=positions[i].y+'px';
+  });
+
+  // Constellation lines
+  const lines=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,3],[1,4]];
+  let lt=0;
+  function drawConst(){
+    requestAnimationFrame(drawConst);
+    lt+=0.005;
+    ctx.clearRect(0,0,cc.width,cc.height);
+    lines.forEach(([a,b],li)=>{
+      const pa=positions[a],pb=positions[b];
+      const pulse=0.04+Math.abs(Math.sin(lt*0.8+li*0.5))*0.1;
+      ctx.beginPath();
+      ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);
+      ctx.strokeStyle=`rgba(0,212,255,${pulse})`;
+      ctx.lineWidth=1;ctx.stroke();
+      // Moving dot on line
+      const tp=(lt*0.3+li*0.2)%1;
+      const dx=pb.x-pa.x,dy=pb.y-pa.y;
+      ctx.beginPath();
+      ctx.arc(pa.x+dx*tp,pa.y+dy*tp,2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,212,255,${0.6+Math.sin(lt)*0.3})`;
+      ctx.fill();
+    });
+    // Draw to center
+    positions.forEach((p,i)=>{
+      const fade=0.03+Math.sin(lt*0.6+i)*0.02;
+      ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(p.x,p.y);
+      ctx.strokeStyle=`rgba(109,40,217,${fade})`;
+      ctx.lineWidth=0.5;ctx.stroke();
+    });
+  }
+  drawConst();
+}
+
+/* ═══════════════════════════════════════════════
+   4. ORBIT NODE POSITIONING
+═══════════════════════════════════════════════ */
+{
+  const sys=document.querySelector('.orbit-system');
+  const SIZE=sys.offsetWidth||580;
+  const CX=SIZE/2,CY=SIZE/2;
+  const orbitRadii=[100,170,240];
+  const nodeOrbit=[[0,1],[2,3],[4,5]];
+  const orbNodes=document.querySelectorAll('.orbit-node');
+
+  nodeOrbit.forEach((group,oi)=>{
+    group.forEach((ni,gi)=>{
+      const angle=(gi/group.length)*Math.PI*2-Math.PI/2;
+      const r=orbitRadii[oi];
+      const x=CX+Math.cos(angle)*r;
+      const y=CY+Math.sin(angle)*r;
+      orbNodes[ni].style.position='absolute';
+      orbNodes[ni].style.left=x+'px';
+      orbNodes[ni].style.top=y+'px';
+      orbNodes[ni].style.transform='translate(-50%,-50%)';
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   5. CURSOR
+═══════════════════════════════════════════════ */
+{
+  const dot=document.getElementById('cursor-dot');
+  const ring=document.getElementById('cursor-ring');
+  let cx=0,cy=0;
+  document.addEventListener('mousemove',e=>{
+    cx=e.clientX;cy=e.clientY;
+    dot.style.left=cx+'px';dot.style.top=cy+'px';
+    setTimeout(()=>{ring.style.left=cx+'px';ring.style.top=cy+'px'},80);
+    document.getElementById('hud-coords').textContent=
+      `X:${((cx/innerWidth-0.5)*20).toFixed(2)} · Y:${((cy/innerHeight-0.5)*20).toFixed(2)}`;
+  });
+  document.addEventListener('mousedown',()=>{dot.style.transform='translate(-50%,-50%) scale(0.5)'});
+  document.addEventListener('mouseup',()=>{dot.style.transform='translate(-50%,-50%) scale(1)'});
+}
+
+/* ═══════════════════════════════════════════════
+   6. SCROLL REVEALS
+═══════════════════════════════════════════════ */
+{
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')});
+  },{threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  // hero reveal immediately
+  setTimeout(()=>{
+    document.querySelectorAll('#hero .reveal').forEach(el=>el.classList.add('in'));
+  },200);
+}
+
+/* ═══════════════════════════════════════════════
+   7. SKILL ENERGY CHARGE
+═══════════════════════════════════════════════ */
+{
+  const skillObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('charged'),300);
+      }
+    });
+  },{threshold:0.4});
+  document.querySelectorAll('.energy-node').forEach(n=>skillObs.observe(n));
+}
+
+/* ═══════════════════════════════════════════════
+   8. DETAIL PANEL
+═══════════════════════════════════════════════ */
+{
+  const panel=document.getElementById('detail-panel');
+  document.getElementById('dp-close').addEventListener('click',()=>panel.classList.remove('open'));
+
+  const nodeData=[
+    {tag:'01 · Star System',title:'Cosmos UI',sub:'Three.js · WebGL · React',
+     body:`<div class="dp-stat"><span class="dp-stat-label">Type</span><span class="dp-stat-val">Dashboard</span></div><div class="dp-stat"><span class="dp-stat-label">Stack</span><span class="dp-stat-val">Three.js + React</span></div><div class="dp-stat"><span class="dp-stat-label">Status</span><span class="dp-stat-val" style="color:#00ff88">Live</span></div><br/><p>An immersive space-themed dashboard with real-time 3D data visualizations and particle systems.</p>`,
+     chips:['Three.js','WebGL','React','GSAP']},
+    {tag:'02 · Star System',title:'NeuralFlow',sub:'Canvas API · Node.js · GSAP',
+     body:`<div class="dp-stat"><span class="dp-stat-label">Type</span><span class="dp-stat-val">AI Tool</span></div><div class="dp-stat"><span class="dp-stat-label">Nodes</span><span class="dp-stat-val">∞ Draggable</span></div><div class="dp-stat"><span class="dp-stat-label">Status</span><span class="dp-stat-val" style="color:#00ff88">Live</span></div><br/><p>Visual AI workflow builder with real-time animated data flows and node-based logic.</p>`,
+     chips:['Canvas','Node.js','GSAP']},
+    {tag:'03 · Star System',title:'Lumen',sub:'GLSL · Vue · Vite',
+     body:`<div class="dp-stat"><span class="dp-stat-label">Type</span><span class="dp-stat-val">Agency Site</span></div><div class="dp-stat"><span class="dp-stat-label">Effect</span><span class="dp-stat-val">Custom Shaders</span></div><div class="dp-stat"><span class="dp-stat-label">Award</span><span class="dp-stat-val" style="color:#ffd94a">AWWWARDS</span></div><br/><p>Creative agency site with custom GLSL shaders, morphing text, and GPU-accelerated effects.</p>`,
+     chips:['GLSL','Shader','Vue','Vite']},
+    {tag:'04 · Star System',title:'DataSphere',sub:'Three.js · D3.js · TypeScript',
+     body:`<div class="dp-stat"><span class="dp-stat-label">Type</span><span class="dp-stat-val">Data Viz</span></div><div class="dp-stat"><span class="dp-stat-label">Data Points</span><span class="dp-stat-val">10M+</span></div><div class="dp-stat"><span class="dp-stat-label">Status</span><span class="dp-stat-val" style="color:#00ff88">Live</span></div><br/><p>Globe visualization platform mapping live data onto an interactive 3D earth model.</p>`,
+     chips:['TypeScript','D3.js','Three.js']},
+    {tag:'05 · Star System',title:'PhysXLab',sub:'WebAssembly · GLSL · Rust',
+     body:`<div class="dp-stat"><span class="dp-stat-label">Type</span><span class="dp-stat-val">Simulation</span></div><div class="dp-stat"><span class="dp-stat-label">Physics</span><span class="dp-stat-val">Real-time</span></div><div class="dp-stat"><span class="dp-stat-label">Status</span><span class="dp-stat-val" style="color:#a855f7">Beta</span></div><br/><p>Real-time physics simulation with soft-body dynamics, fluid sim, and particle collisions.</p>`,
+     chips:['WASM','GLSL','Rust']},
+    {tag:'06 · Star System',title:'SignalOS',sub:'Electron · React · Python',
+     body:`<div class="dp-stat"><span class="dp-stat-label">Type</span><span class="dp-stat-val">Dev Tool</span></div><div class="dp-stat"><span class="dp-stat-label">AI</span><span class="dp-stat-val">Integrated</span></div><div class="dp-stat"><span class="dp-stat-label">Status</span><span class="dp-stat-val" style="color:#00d4ff">Alpha</span></div><br/><p>Developer productivity OS with AI terminal, process manager, and git graph visualizer.</p>`,
+     chips:['Electron','React','Python']}
+  ];
+
+  document.querySelectorAll('.star-node').forEach((node,i)=>{
+    node.addEventListener('click',()=>{
+      const d=nodeData[i];
+      document.getElementById('dp-tag').textContent=d.tag;
+      document.getElementById('dp-title').textContent=d.title;
+      document.getElementById('dp-sub').textContent=d.sub;
+      document.getElementById('dp-body').innerHTML=d.body;
+      document.getElementById('dp-tags').innerHTML=d.chips.map(c=>`<div class="dp-chip">${c}</div>`).join('');
+      panel.classList.add('open');
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   9. TRANSMIT BUTTON
+═══════════════════════════════════════════════ */
+{
+  const btn=document.getElementById('transmit-btn');
+  btn.addEventListener('click',()=>{
+    btn.classList.add('transmitting');
+    btn.textContent='◈ SIGNAL TRANSMITTED ✓';
+    btn.style.color='#00ff88';btn.style.borderColor='rgba(0,255,136,0.4)';
+    setTimeout(()=>{
+      btn.classList.remove('transmitting');
+      btn.innerHTML='◈ TRANSMIT SIGNAL<div class="signal-beam"></div>';
+      btn.style.color='';btn.style.borderColor='';
+    },3000);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   10. HUD CLOCK & FPS
+═══════════════════════════════════════════════ */
+{
+  setInterval(()=>{
+    const n=new Date();
+    document.getElementById('hud-clock').textContent=
+      [n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  },1000);
+
+  let frames=0,lastT=performance.now();
+  function fps(){
+    requestAnimationFrame(fps);
+    frames++;
+    const now=performance.now();
+    if(now-lastT>1000){
+      document.getElementById('hud-fps').textContent=frames+' FPS';
+      frames=0;lastT=now;
+    }
+  }
+  fps();
+}
+
+/* ═══════════════════════════════════════════════
+   11. NAV ACTIVE + SCROLL
+═══════════════════════════════════════════════ */
+{
+  const sections=document.querySelectorAll('section[id]');
+  const links=document.querySelectorAll('.nav-link');
+  const nav=document.querySelector('nav');
+  window.addEventListener('scroll',()=>{
+    nav.style.background=window.scrollY>50?'rgba(2,4,12,0.9)':'rgba(2,4,12,0.7)';
+    let cur='';
+    sections.forEach(s=>{if(window.scrollY>=s.offsetTop-200)cur=s.id});
+    links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+cur));
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+    });
+  });
+}
+</script>
+</body>
+</html>
